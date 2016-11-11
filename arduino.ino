@@ -1,112 +1,222 @@
-int Vin= 5;
-float valDetrigger = 43000;
-float valTrigger = 45000;
+/*
+ * Arduino sketch for Project-Cas
+ * https://github.com/FinlayDaG33k/project-cas
+ * Jupp, I gotta clean up this code!
+ */
+
+// Constants for all fingers
+const int Vin= 5;                     // Voltage input for resistance measuring
+const float valDetrigger = 43000;     // Resistance in Ohms needed to detrigger a finger.
+const float valTrigger = 45000;       // Resistance in Ohms needed to trigger a finger.
 
 // Right Ring Finger
-int RFPin= 2;
-float RFR1= 20000;
-float RFR2= 0;
-int RFraw= 0;
-int RFLPin = 2;
-bool RFB = false;
+int RRFPin= 2;                         // Pin resitor pin
+float RRFR1= 20000;                    // Resitor value in Ohm
+float RRFR2= 0;                        // Resistor value for the finger.
+int RRFraw= 0;                         // I don't remember what this does :D
+int RRFLPin = 2;                       // Led pin
+bool RRFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
 
 // Right Middle Finger
-int MFPin= 1;
-float MFR1= 20000;
-float MFR2= 0;
-int MFraw= 0;
-int MFLPin = 3;
-bool MFB = false;
+int RMFPin= 1;                         // Pin resitor pin
+float RMFR1= 20000;                    // Resitor value in Ohm
+float RMFR2= 0;                        // Resistor value for the finger.
+int RMFraw= 0;                         // I don't remember what this does :D
+int RMFLPin = 3;                       // Led pin
+bool RMFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
 
 // Right Index Finger
-int IFPin= 0;
-float IFR1= 20000;
-float IFR2= 0;
-int IFraw= 0;
-int IFLPin = 4;
-bool IFB = false;
+int RIFPin= 0;                         // Pin resitor pin
+float RIFR1= 20000;                    // Resitor value in Ohm
+float RIFR2= 0;                        // Resistor value for the finger.
+int RIFraw= 0;                         // I don't remember what this does :D
+int RIFLPin = 4;                       // Led pin
+bool RIFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
 
-void ringFinger(){
+// Left Index Finger
+int LIFPin= 3;                         // Pin resitor pin
+float LIFR1= 20000;                    // Resitor value in Ohm
+float LIFR2= 0;                        // Resistor value for the finger.
+int LIFraw= 0;                         // I don't remember what this does :D
+int LIFLPin = 5;                       // Led pin
+bool LIFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
+
+// Left Middle Finger
+int LMFPin= 4;                         // Pin resitor pin
+float LMFR1= 20000;                    // Resitor value in Ohm
+float LMFR2= 0;                        // Resistor value for the finger.
+int LMFraw= 0;                         // I don't remember what this does :D
+int LMFLPin = 6;                       // Led pin
+bool LMFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
+
+// Left Ring Finger
+int LRFPin= 5;                         // Pin resitor pin
+float LRFR1= 20000;                    // Resitor value in Ohm
+float LRFR2= 0;                        // Resistor value for the finger.
+int LRFraw= 0;                         // I don't remember what this does :D
+int LRFLPin = 7;                       // Led pin
+bool LRFB = false;                     // this will be true when the finger has been triggered (to not have it spam)
+
+void RightRingFinger(){
   float buffer= 0;
   float Vout= 0;
   
-  RFraw= analogRead(RFPin);
-  if(RFraw){
-    buffer= RFraw * Vin;
+  RRFraw= analogRead(RRFPin);
+  if(RRFraw){                            // Check if there is a voltage coming in to the analog pin
+    buffer= RRFraw * Vin;
     Vout= (buffer)/1024.0;
     buffer= (Vin/Vout) -1;
-    RFR2= RFR1 * buffer;
-    if(RFR2 > valTrigger){
-      digitalWrite(RFLPin,HIGH);
-      if(RFB == false){
-        Serial.println("R3");
-        RFB = true;
+    RRFR2= RRFR1 * buffer;                // Calculate the resistor value based on the 20K ohm resistor and the incoming voltage.
+    if(RRFR2 > valTrigger){              // check if current resistor value is higher than trigger value
+      digitalWrite(RRFLPin,HIGH);        // turn on the LED
+      if(RRFB == false){                 // Check if trigger has been activated already
+        Serial.println("R3");           // Send trigger to serial
+        RRFB = true;                     // set the debounce value to true to not trigger it again until resistor has been lowered first
       }
     }
-    if(RFR2 < valDetrigger){
-      digitalWrite(RFLPin,LOW);
-      RFB = false;
+    if(RRFR2 < valDetrigger){            // check if current resistor value is lower than the detrigger value.
+      digitalWrite(RRFLPin,LOW);         // Turn off the LED
+      RRFB = false;                      // Set the debounce value to false for a new trigger
     }
   }
 }
 
-void middleFinger(){
+void RightMiddleFinger(){
   float buffer= 0;
   float Vout= 0;
   
-  MFraw= analogRead(MFPin);
-  if(MFraw){
-    buffer= MFraw * Vin;
+  RMFraw= analogRead(RMFPin);
+  if(RMFraw){
+    buffer= RMFraw * Vin;
     Vout= (buffer)/1024.0;
     buffer= (Vin/Vout) -1;
-    MFR2= MFR1 * buffer;
-    if(MFR2 > valTrigger){
-      digitalWrite(MFLPin,HIGH);
-      if(MFB == false){
+    RMFR2= RMFR1 * buffer;
+    if(RMFR2 > valTrigger){
+      digitalWrite(RMFLPin,HIGH);
+      if(RMFB == false){
         Serial.println("R2");
-        MFB = true;
+        RMFB = true;
       }
     }
-    if(MFR2 < valDetrigger){
-      digitalWrite(MFLPin,LOW);
-      MFB = false;
+    if(RMFR2 < valDetrigger){
+      digitalWrite(RMFLPin,LOW);
+      RMFB = false;
     }
   }
 }
 
-void indexFinger(){
+void RightIndexFinger(){
   float buffer= 0;
   float Vout= 0;
   
-  IFraw= analogRead(IFPin);
-  if(IFraw){
-    buffer= IFraw * Vin;
+  RIFraw= analogRead(RIFPin);
+  if(RIFraw){
+    buffer= RIFraw * Vin;
     Vout= (buffer)/1024.0;
     buffer= (Vin/Vout) -1;
-    IFR2= IFR1 * buffer;
-    if(IFR2 > valTrigger){
-      digitalWrite(IFLPin,HIGH);
-      if(IFB == false){
+    RIFR2= RIFR1 * buffer;
+    if(RIFR2 > valTrigger){
+      digitalWrite(RIFLPin,HIGH);
+      if(RIFB == false){
         Serial.println("R1");
-        IFB = true;
+        RIFB = true;
       }
     }
-    if(IFR2 < valDetrigger){
-      digitalWrite(IFLPin,LOW);
-      IFB = false;
+    if(RIFR2 < valDetrigger){
+      digitalWrite(RIFLPin,LOW);
+      RIFB = false;
+    }
+  }
+}
+
+
+void LeftIndexFinger(){
+  float buffer= 0;
+  float Vout= 0;
+  
+  LIFraw= analogRead(LIFPin);
+  if(LIFraw){                            // Check if there is a voltage coming in to the analog pin
+    buffer= LIFraw * Vin;
+    Vout= (buffer)/1024.0;
+    buffer= (Vin/Vout) -1;
+    LIFR2= LIFR1 * buffer;                // Calculate the resistor value based on the 20K ohm resistor and the incoming voltage.
+    if(LIFR2 > valTrigger){              // check if current resistor value is higher than trigger value
+      digitalWrite(LIFLPin,HIGH);        // turn on the LED
+      if(LIFB == false){                 // Check if trigger has been activated already
+        Serial.println("L1");           // Send trigger to serial
+        LIFB = true;                     // set the debounce value to true to not trigger it again until resistor has been lowered first
+      }
+    }
+    if(LIFR2 < valDetrigger){            // check if current resistor value is lower than the detrigger value.
+      digitalWrite(LIFLPin,LOW);         // Turn off the LED
+      LIFB = false;                      // Set the debounce value to false for a new trigger
+    }
+  }
+}
+
+void LeftMiddleFinger(){
+  float buffer= 0;
+  float Vout= 0;
+  
+  LMFraw= analogRead(LMFPin);
+  if(LMFraw){                            // Check if there is a voltage coming in to the analog pin
+    buffer= LMFraw * Vin;
+    Vout= (buffer)/1024.0;
+    buffer= (Vin/Vout) -1;
+    LMFR2= LMFR1 * buffer;                // Calculate the resistor value based on the 20K ohm resistor and the incoming voltage.
+    if(LMFR2 > valTrigger){              // check if current resistor value is higher than trigger value
+      digitalWrite(LMFLPin,HIGH);        // turn on the LED
+      if(LMFB == false){                 // Check if trigger has been activated already
+        Serial.println("L2");           // Send trigger to serial
+        LMFB = true;                     // set the debounce value to true to not trigger it again until resistor has been lowered first
+      }
+    }
+    if(LMFR2 < valDetrigger){            // check if current resistor value is lower than the detrigger value.
+      digitalWrite(LMFLPin,LOW);         // Turn off the LED
+      LMFB = false;                      // Set the debounce value to false for a new trigger
+    }
+  }
+}
+
+void LeftRingFinger(){
+  float buffer= 0;
+  float Vout= 0;
+  
+  LRFraw= analogRead(LRFPin);
+  if(LRFraw){                            // Check if there is a voltage coming in to the analog pin
+    buffer= LRFraw * Vin;
+    Vout= (buffer)/1024.0;
+    buffer= (Vin/Vout) -1;
+    LRFR2= LRFR1 * buffer;                // Calculate the resistor value based on the 20K ohm resistor and the incoming voltage.
+    if(LRFR2 > valTrigger){              // check if current resistor value is higher than trigger value
+      digitalWrite(LRFLPin,HIGH);        // turn on the LED
+      if(LRFB == false){                 // Check if trigger has been activated already
+        Serial.println("L3");           // Send trigger to serial
+        LRFB = true;                     // set the debounce value to true to not trigger it again until resistor has been lowered first
+      }
+    }
+    if(LRFR2 < valDetrigger){            // check if current resistor value is lower than the detrigger value.
+      digitalWrite(LRFLPin,LOW);         // Turn off the LED
+      LRFB = false;                      // Set the debounce value to false for a new trigger
     }
   }
 }
 
 void setup(){
    Serial.begin(9600);
-   pinMode(RFLPin, OUTPUT);
-   pinMode(MFLPin, OUTPUT);
-   pinMode(IFLPin, OUTPUT);
+   pinMode(RRFLPin, OUTPUT);
+   pinMode(RMFLPin, OUTPUT);
+   pinMode(RIFLPin, OUTPUT);
+   pinMode(LIFLPin, OUTPUT);
+   pinMode(LRFLPin, OUTPUT);
+   pinMode(LMFLPin, OUTPUT);
 }
 
 void loop(){
-  indexFinger();
-  ringFinger();
-  middleFinger();
+  RightIndexFinger();
+  RightRingFinger();
+  RightMiddleFinger();
+  LeftIndexFinger();
+  LeftRingFinger();
+  LeftMiddleFinger();
 }
