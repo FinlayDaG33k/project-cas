@@ -55,4 +55,5 @@ void loop(){
   for (auto finger : fingers){
     output[finger.key] = checkFinger(finger.key);
   }
+  output.printTo(Serial);
 }
