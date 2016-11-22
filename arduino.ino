@@ -16,11 +16,14 @@ JSON default-config
 DynamicJsonBuffer jsonBuffer;
 
 // JSON Config (Don't forget to escape it!)
-char* json = "{\"Vin\":5,\"trigger\":45000,\"detrigger\":43000,\"fingers\":{\"R1\":{\"sensorPin\": 0,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 4,\"triggered\": false},\"R2\": {\"sensorPin\": 1,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 3,\"triggered\": false},\"R3\": {\"sensorPin\": 2,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 2,\"triggered\": false},\"L1\": {\"sensorPin\": 3,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 5,\"triggered\": false},\"L2\": {\"sensorPin\": 4,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 6,\"triggered\": false},\"L3\": {\"sensorPin\": 5,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 7,\"triggered\": false}}}\n"; // Set the config values in (escaped) JSON
+char* json = "{\"Vin\":5,\"trigger\":45000,\"detrigger\":43000,\"fingers\":{\"R1\":{\"sensorPin\": 0,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 4,\"triggered\": false},\"R2\": {\"sensorPin\": 1,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 3,\"triggered\": false},\"R3\": {\"sensorPin\": 2,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 2,\"triggered\": false},\"L1\": {\"sensorPin\": 3,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 5,\"triggered\": false},\"L2\": {\"sensorPin\": 4,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 6,\"triggered\": false},\"L3\": {\"sensorPin\": 5,\"sensorResistor\": 20000,\"sensorValue\": 0,\"raw\": 0,\"ledPin\": 7,\"triggered\": false}}}";
+
+// Parse the JSON in 2 arrays: the fingers and the variables
 JsonObject& variables = jsonBuffer.parseObject(json); // parse the JSON values in an array called: variables
 JsonObject& fingers =  variables["fingers"]; // get all fingers
+JsonObject& output = jsonBuffer.createObject();
 
-void checkFinger(char *fingerCode){
+bool checkFinger(char *fingerCode){
   float buffer= 0;
   float Vout= 0;
   variables["fingers"][fingerCode]["raw"] = analogRead(variables["fingers"][fingerCode]["sensorPin"]);
@@ -31,27 +34,25 @@ void checkFinger(char *fingerCode){
     variables["fingers"][fingerCode]["sensorValue"]= variables["fingers"][fingerCode]["sensorResistor"].as<float>() * buffer;
     if(variables["fingers"][fingerCode]["sensorValue"] > variables["trigger"].as<float>()){
       digitalWrite(variables["fingers"][fingerCode]["ledPin"],HIGH);
-      if(variables["fingers"][fingerCode]["triggered"] == false){
-        Serial.println(fingerCode);
-        variables["fingers"][fingerCode]["triggered"] = true;
-      }
-    }
-    if(variables["fingers"][fingerCode]["sensorValue"] < variables["detrigger"].as<float>()){
+      variables["fingers"][fingerCode]["triggered"] = true;
+      return 1;
+    }else if(variables["fingers"][fingerCode]["sensorValue"] < variables["detrigger"].as<float>()){
       digitalWrite(variables["fingers"][fingerCode]["ledPin"],LOW);
       variables["fingers"][fingerCode]["triggered"] = false;
+      return 0;
     }
   }
 }
 
 void setup(){
-   Serial.begin(9600);
+   Serial.begin(115200,SERIAL_8E1);
    for (auto finger : fingers){
-    pinMode(variables[finger.key]["ledPin"], OUTPUT);
+    pinMode(variables[finger.key]["ledPin"], OUTPUT); // set the ledPin for the current finger as an OUTPUT
    }   
 }
 
 void loop(){
   for (auto finger : fingers){
-    checkFinger(finger.key);
-  }  
+    output[finger.key] = checkFinger(finger.key);
+  }
 }
